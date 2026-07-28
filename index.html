@@ -62,6 +62,11 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: message, session_id: sessionId })
             });
+            if (!response.ok) {
+    addBubble("The server is waking up, please try again in a few seconds.", "assistant");
+    return;
+}
+
 
             const data = await response.json();
             addBubble(data.reply, "assistant");
