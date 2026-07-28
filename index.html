@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Personal Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            background: #f5f5f5;
+        }
+        #chat-box {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+        }
+        .message {
+            padding: 8px 12px;
+            margin: 6px 0;
+            border-radius: 6px;
+            max-width: 80%;
+            white-space: pre-wrap;
+        }
+        .user { background: #dcefff; margin-left: auto; text-align: right; }
+        .assistant { background: #eee; }
+        #input-row { display: flex; gap: 8px; }
+        #user-input { flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc; }
+        button { padding: 10px 16px; border: none; border-radius: 6px; background: #4a90e2; color: white; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>🤖 Personal Assistant</h2>
+    <div id="chat-box"></div>
+    <div id="input-row">
+        <input type="text" id="user-input" placeholder="Ask about weather, search the web, or send yourself an email..." />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+<script>
+
+     const API_URL = "/chat";
+        let sessionId = localStorage.getItem("session_id");
+        if (!sessionId) {
+            sessionId = crypto.randomUUID();
+            localStorage.setItem("session_id", sessionId);
+        }
+
+                async function sendMessage() {
+            const input = document.getElementById("user-input");
+            const message = input.value.trim();
+            if (!message) return;
+
+            addBubble(message, "user");
+            input.value = "";
+
+            const response = await fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: message, session_id: sessionId })
+            });
+
+            const data = await response.json();
+            addBubble(data.reply, "assistant");
+        }
+
+
+         function addBubble(text, role) {
+            const chatBox = document.getElementById("chat-box");
+            const bubble = document.createElement("div");
+            bubble.className = "message " + role;
+            bubble.textContent = text;
+            chatBox.appendChild(bubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.getElementById("user-input").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") sendMessage();
+        });
+
+</script>
+
+</body>
+</html>
